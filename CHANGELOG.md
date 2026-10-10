@@ -7,6 +7,32 @@ dan proyek ini mematuhi [Semantic Versioning](https://semver.org/lang/id/).
 
 ---
 
+## [0.1.2] - 2026-10-10
+
+### Ditambahkan (Tahap 8 — CI Verification Gate, Automated Code Analysis & Reliability)
+- **CI Verification Gate:** Verifikasi aktual eksekusi GitHub Actions CI workflow (Run ID: 38066050244) untuk commit Tahap 7 dengan hasil 100% lulus (Python 3.12 & Python 3.13).
+- **Python AST Analyzer (`src/kanoman/analysis/python_analyzer.py`):**
+  - Analisis kode Python murni AST via standard library `ast` tanpa mengeksekusi kode target.
+  - Pendeteksian pola bahaya: `PY_SYNTAX_ERROR`, `PY_EVAL_EXEC`, `PY_SUBPROCESS_SHELL`, `PY_INSECURE_PICKLE`, `PY_HARDCODED_SECRET`, dan `PY_FILE_READ_ERROR`.
+  - Penegakan isolasi path traversal dalam batasan `workspace_root`.
+- **Markdown Validator (`src/kanoman/analysis/markdown_validator.py`):**
+  - Validasi sintaksis dan integritas struktural dokumentasi Markdown berbasis finite state machine.
+  - Pemeriksaan `MD_EMPTY_FILE`, `MD_EMPTY_HEADING`, `MD_UNCLOSED_FENCE`, `MD_BROKEN_LINK`, `MD_MALFORMED_CHECKLIST`, `MD_MISSING_LOCAL_REF`, dan `MD_FILE_READ_ERROR`.
+  - Resolusi link referensi file lokal terhadap disk.
+- **Data Models Analisis (`src/kanoman/analysis/models.py`):**
+  - Model Pydantic v2 untuk `Finding`, `FindingSeverity`, `RuleDefinition`, dan `AnalysisReport`.
+- **Task Orchestrator Handlers:**
+  - Penambahan handler otomatis `analyze_python` dan `validate_markdown` dengan pencatatan hasil ke checkpoint.
+  - Penambahan field `metadata` pada model `Task`.
+- **CLI Subcommands:**
+  - `kanoman analyze python <path> [--root <dir>] [--format text|json]`.
+  - `kanoman analyze markdown <path> [--root <dir>] [--format text|json]`.
+- **Pengujian & Dokumentasi:**
+  - 21 uji coba baru di `tests/test_analysis.py` (total 67 tests, 100% lulus).
+  - Dokumentasi teknis lengkap di `docs/ANALYSIS.md`.
+
+---
+
 ## [0.1.1] - 2026-10-10
 
 ### Keamanan & Pengerasan (Phase 7 Audit Hardening)

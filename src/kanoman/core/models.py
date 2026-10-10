@@ -53,6 +53,7 @@ class Task(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     acceptance_criteria: List[str] = Field(default_factory=list)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
     result_summary: Optional[str] = Field(default=None)
     checkpoint_id: Optional[str] = Field(default=None)
     sanitized_error: Optional[str] = Field(default=None)

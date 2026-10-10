@@ -71,6 +71,20 @@ def build_parser() -> argparse.ArgumentParser:
     dry_g.add_argument("--files", nargs="+", required=True, help="Files to simulate staging.")
     dry_g.add_argument("-m", "--message", required=True, help="Commit message.")
 
+    # Subcommand: analyze
+    analyze_parser = subparsers.add_parser("analyze", help="Perform automated static code and document analysis.")
+    analyze_subs = analyze_parser.add_subparsers(dest="analyze_action")
+
+    py_p = analyze_subs.add_parser("python", help="Analyze Python files via AST security visitor.")
+    py_p.add_argument("path", nargs="?", default=".", help="Target file or directory path (default: current directory).")
+    py_p.add_argument("--root", default=None, help="Authorized workspace root (default: config.workspace_root).")
+    py_p.add_argument("--format", choices=["text", "json"], default="text", help="Output format (default: text).")
+
+    md_p = analyze_subs.add_parser("markdown", help="Validate Markdown files for structure and links.")
+    md_p.add_argument("path", nargs="?", default=".", help="Target file or directory path (default: current directory).")
+    md_p.add_argument("--root", default=None, help="Authorized workspace root (default: config.workspace_root).")
+    md_p.add_argument("--format", choices=["text", "json"], default="text", help="Output format (default: text).")
+
     # Subcommand: test
     subparsers.add_parser("test", help="Execute test suite via pytest.")
 
@@ -190,6 +204,65 @@ def main(args: list[str] | None = None) -> int:
             except Exception as e:
                 print(f"Git dry-run error: {e}", file=sys.stderr)
                 return 1
+
+    elif parsed.subcommand == "analyze":
+        from kanoman.analysis.models import AnalysisReport
+        from kanoman.analysis.python_analyzer import PythonASTAnalyzer
+        from kanoman.analysis.markdown_validator import MarkdownValidator
+
+        root = Path(parsed.root).resolve() if parsed.root else config.workspace_root
+        target = Path(parsed.path)
+        if not target.is_absolute():
+            target = (root / target).resolve()
+
+        if parsed.analyze_action == "python":
+            analyzer = PythonASTAnalyzer(workspace_root=root)
+            if target.is_file():
+                findings = analyzer.analyze_file(target)
+                report = AnalysisReport(
+                    analyzer_name="PythonASTAnalyzer",
+                    workspace_root=str(root),
+                    files_scanned=1,
+                    findings=findings,
+                )
+            else:
+                report = analyzer.analyze_directory(target)
+        elif parsed.analyze_action == "markdown":
+            validator = MarkdownValidator(workspace_root=root)
+            if target.is_file():
+                findings = validator.validate_file(target)
+                report = AnalysisReport(
+                    analyzer_name="MarkdownValidator",
+                    workspace_root=str(root),
+                    files_scanned=1,
+                    findings=findings,
+                )
+            else:
+                report = validator.validate_directory(target)
+        else:
+            print("Please specify an analysis target: python or markdown", file=sys.stderr)
+            return 1
+
+        if parsed.format == "json":
+            print(report.model_dump_json(indent=2))
+        else:
+            print(f"=== {report.analyzer_name} Report ===")
+            print(f"Files scanned: {report.files_scanned}")
+            print(f"Findings:      {len(report.findings)}")
+            for sev, count in report.summary_by_severity.items():
+                if count > 0:
+                    print(f"  - {sev}: {count}")
+            if report.findings:
+                print("\nFindings detail:")
+                for f in report.findings:
+                    pos = f":{f.line}" if f.line is not None else ""
+                    print(f" [{f.severity.value}] {f.file_path}{pos} — [{f.rule_id}] {f.message}")
+                    if f.recommendation:
+                        print(f"     Fix: {f.recommendation}")
+            else:
+                print("All files passed analysis cleanly.")
+
+        return 1 if report.has_high_or_critical else 0
 
     elif parsed.subcommand == "test":
         import pytest

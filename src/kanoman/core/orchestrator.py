@@ -60,8 +60,90 @@ class TaskOrchestrator:
                 "project_count": len(registry.list_projects()),
             }
 
+        def analyze_python_handler(
+            task: Task, config: KanomanConfig, registry: ProjectRegistry
+        ) -> Dict[str, Any]:
+            from pathlib import Path
+            from kanoman.analysis.python_analyzer import PythonASTAnalyzer
+
+            analyzer = PythonASTAnalyzer(workspace_root=config.workspace_root)
+            raw_target = task.metadata.get("target_path") if task.metadata else None
+            target = Path(raw_target) if raw_target else config.workspace_root
+            if not target.is_absolute():
+                target = (config.workspace_root / target).resolve()
+
+            if target.is_file():
+                findings = analyzer.analyze_file(target)
+                report_dict = {
+                    "analyzer": "PythonASTAnalyzer",
+                    "files_scanned": 1,
+                    "findings_count": len(findings),
+                    "findings": [f.model_dump() for f in findings],
+                }
+            else:
+                report = analyzer.analyze_directory(target)
+                report_dict = {
+                    "analyzer": report.analyzer_name,
+                    "files_scanned": report.files_scanned,
+                    "findings_count": len(report.findings),
+                    "summary_by_severity": report.summary_by_severity,
+                    "findings": [f.model_dump() for f in report.findings],
+                }
+
+            msg = (
+                f"Python AST analysis completed: {report_dict['files_scanned']} file(s) scanned, "
+                f"{report_dict['findings_count']} finding(s)."
+            )
+            return {
+                "message": msg,
+                "report": report_dict,
+                "test_results": {"findings_count": report_dict["findings_count"]},
+            }
+
+        def validate_markdown_handler(
+            task: Task, config: KanomanConfig, registry: ProjectRegistry
+        ) -> Dict[str, Any]:
+            from pathlib import Path
+            from kanoman.analysis.markdown_validator import MarkdownValidator
+
+            validator = MarkdownValidator(workspace_root=config.workspace_root)
+            raw_target = task.metadata.get("target_path") if task.metadata else None
+            target = Path(raw_target) if raw_target else config.workspace_root
+            if not target.is_absolute():
+                target = (config.workspace_root / target).resolve()
+
+            if target.is_file():
+                findings = validator.validate_file(target)
+                report_dict = {
+                    "analyzer": "MarkdownValidator",
+                    "files_scanned": 1,
+                    "findings_count": len(findings),
+                    "findings": [f.model_dump() for f in findings],
+                }
+            else:
+                report = validator.validate_directory(target)
+                report_dict = {
+                    "analyzer": report.analyzer_name,
+                    "files_scanned": report.files_scanned,
+                    "findings_count": len(report.findings),
+                    "summary_by_severity": report.summary_by_severity,
+                    "findings": [f.model_dump() for f in report.findings],
+                }
+
+            msg = (
+                f"Markdown validation completed: {report_dict['files_scanned']} file(s) scanned, "
+                f"{report_dict['findings_count']} finding(s)."
+            )
+            return {
+                "message": msg,
+                "report": report_dict,
+                "test_results": {"findings_count": report_dict["findings_count"]},
+            }
+
         self.register_handler("ping", ping_handler)
         self.register_handler("inspect_workspace", inspect_workspace_handler)
+        self.register_handler("analyze_python", analyze_python_handler)
+        self.register_handler("validate_markdown", validate_markdown_handler)
 
     def register_handler(self, task_type: str, handler: TaskHandler) -> None:
         """Register a custom task handler."""
