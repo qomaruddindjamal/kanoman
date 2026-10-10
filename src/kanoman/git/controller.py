@@ -56,10 +56,12 @@ class GitController:
         """Execute git command safely via subprocess without shell."""
         # Safety Check: Disallow prohibited destructive flags
         for arg in args:
-            if arg in {"--force", "-f", "+"} or arg.startswith("--force-with-lease="):
+            if arg in {"--force", "-f", "+"} or arg.startswith("--force"):
                 raise ValueError(f"Prohibited destructive Git flag detected: '{arg}'")
-        if "reset" in args and "--hard" in args:
+        if "reset" in args and any(f in args for f in ["--hard", "--merge"]):
             raise ValueError("Destructive command 'git reset --hard' is strictly prohibited.")
+        if "clean" in args and any(f in args for f in ["-f", "-fdx", "--force"]):
+            raise ValueError("Destructive command 'git clean' is strictly prohibited.")
 
         cmd = ["git"] + args
         try:
@@ -185,6 +187,31 @@ class GitController:
                         findings.append(f"Secret detected matching pattern: {pattern.pattern}")
         return findings
 
+    def validate_target_file(self, file_path_str: str) -> Path:
+        """Validate target file path against path traversal and prohibited credential file names."""
+        clean_str = file_path_str.strip()
+        if not clean_str:
+            raise ValueError("Target file path cannot be empty.")
+
+        path_obj = Path(clean_str)
+        if path_obj.is_absolute() or (len(clean_str) > 1 and clean_str[1] == ":"):
+            raise ValueError(f"Absolute file paths are prohibited: '{clean_str}'")
+
+        resolved = (self.workspace_root / path_obj).resolve()
+        if self.workspace_root not in resolved.parents and resolved != self.workspace_root:
+            raise ValueError(f"Path traversal detected: '{clean_str}' resolves outside workspace root")
+
+        # Prohibit sensitive credential file names
+        name_lower = path_obj.name.lower()
+        if (
+            name_lower == ".env"
+            or name_lower.startswith(".env.")
+            or any(name_lower.endswith(ext) for ext in [".key", ".pem", ".token", ".pfx", ".p12"])
+        ):
+            raise ValueError(f"Attempting to operate on prohibited credential file: '{clean_str}'")
+
+        return resolved
+
     def dry_run(self, files: List[str], message: str) -> GitOperationPlan:
         """Simulate a commit operation without altering repository state."""
         self.verify_repository_identity()
@@ -192,7 +219,12 @@ class GitController:
 
         # Check file existence and inspect content for secrets
         for f in files:
-            full_path = self.workspace_root / f
+            try:
+                full_path = self.validate_target_file(f)
+            except ValueError as ve:
+                warnings.append(str(ve))
+                continue
+
             if not full_path.exists():
                 warnings.append(f"Target file does not exist: {f}")
             elif full_path.is_file():
@@ -248,6 +280,10 @@ class GitController:
 
         self.verify_repository_identity()
 
+        # Step 0: Validate file paths
+        for f in files:
+            self.validate_target_file(f)
+
         # Step 1: Stage specific files
         stage_res = self._run_git(["add", "--"] + files)
         if stage_res.returncode != 0:
@@ -297,6 +333,18 @@ class GitController:
             return True
 
         self.verify_repository_identity()
+
+        # Verify remote URL
+        res_rem_url = self._run_git(["config", "--get", f"remote.{remote}.url"])
+        if res_rem_url.returncode != 0:
+            raise ValueError(f"Remote '{remote}' is not configured in this repository.")
+        actual_remote_url = res_rem_url.stdout.strip().rstrip("/").removesuffix(".git")
+        expected_remote_url = self.allowed_remote.rstrip("/").removesuffix(".git")
+        if actual_remote_url != expected_remote_url:
+            raise ValueError(
+                f"Unauthorized push remote URL: remote '{remote}' points to '{actual_remote_url}', "
+                f"expected '{self.allowed_remote}'"
+            )
 
         target_branch = branch
         if not target_branch:

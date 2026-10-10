@@ -7,6 +7,18 @@ dan proyek ini mematuhi [Semantic Versioning](https://semver.org/lang/id/).
 
 ---
 
+## [0.1.1] - 2026-10-10
+
+### Keamanan & Pengerasan (Phase 7 Audit Hardening)
+- **Git Controller:** Menambahkan validasi ketat path traversal pada seluruh parameter berkas, pemblokiran tanpa syarat terhadap berkas credential (`.env*`, `*.key`, `*.pem`, `*.token`), serta verifikasi URL remote sebelum `safe_push()`. Pemblokiran diperluas untuk varian `--force-with-lease`, `reset --merge`, dan `clean -fdx`.
+- **Recovery Engine:** Validasi format `checkpoint_id` dan pencegahan path traversal di `load_checkpoint()`.
+- **Task Orchestrator:** Pencegahan eksekusi berulang terhadap task dalam status terminal (`COMPLETED`, `CANCELLED`).
+- **AI Abstraction Layer:** Adapter `GeminiAIProvider` dialihkan menggunakan HTTP header `x-goog-api-key` guna mencegah pemaparan API key pada query string URL. Menambahkan `generate_structured()` pada `AIRouter` dan membatasi fallback hanya pada transient/availability errors.
+- **Project Registry:** Dukungan persistensi penyimpanan file atomik (`.kanoman_projects.json`) dan penolakan root drive OS.
+- **CI & Supply Chain:** Menyertakan ekstra `mcp` pada pipeline pengujian GitHub Actions CI.
+
+---
+
 ## [0.1.0] - 2026-10-10
 
 ### Ditambahkan

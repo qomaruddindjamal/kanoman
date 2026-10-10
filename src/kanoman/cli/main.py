@@ -103,7 +103,7 @@ def main(args: list[str] | None = None) -> int:
         return 0
 
     elif parsed.subcommand == "project":
-        registry = ProjectRegistry()
+        registry = ProjectRegistry(storage_file=config.workspace_root / ".kanoman_projects.json")
         if parsed.proj_action == "list":
             projects = registry.list_projects()
             print(f"Registered Projects ({len(projects)}):")

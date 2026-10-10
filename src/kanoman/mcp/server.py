@@ -26,7 +26,7 @@ def create_mcp_server(name: str = "kanoman-mcp") -> MCPServer:
     """Create and configure the Kanoman MCP server."""
     server = MCPServer(name)
     config = get_config()
-    registry = ProjectRegistry()
+    registry = ProjectRegistry(storage_file=config.workspace_root / ".kanoman_projects.json")
     orchestrator = TaskOrchestrator(config=config, registry=registry)
 
     @server.tool()

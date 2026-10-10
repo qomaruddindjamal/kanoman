@@ -57,7 +57,15 @@ class RecoveryEngine:
 
     def load_checkpoint(self, checkpoint_id: str) -> Checkpoint:
         """Load and strictly validate a checkpoint by its ID."""
-        file_path = self.checkpoint_dir / f"{checkpoint_id}.json"
+        clean_id = checkpoint_id.strip()
+        import re
+        if not clean_id or not re.match(r"^[a-zA-Z0-9_\-]+$", clean_id):
+            raise ValueError(f"Invalid checkpoint_id format: '{checkpoint_id}'")
+
+        file_path = (self.checkpoint_dir / f"{clean_id}.json").resolve()
+        if self.checkpoint_dir.resolve() not in file_path.parents:
+            raise ValueError(f"Path traversal detected in checkpoint_id: '{checkpoint_id}'")
+
         if not file_path.is_file():
             raise FileNotFoundError(f"Checkpoint file '{file_path}' does not exist.")
 

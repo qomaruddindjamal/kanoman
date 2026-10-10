@@ -49,7 +49,7 @@ class OllamaAIProvider:
         endpoint = f"{self.host}/api/version"
         req = urllib.request.Request(endpoint, method="GET")
         try:
-            with urllib.request.urlopen(req, timeout=3) as resp:
+            with urllib.request.urlopen(req, timeout=1) as resp:
                 return resp.status == 200
         except Exception:
             return False

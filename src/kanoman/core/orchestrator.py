@@ -77,6 +77,10 @@ class TaskOrchestrator:
             status="TASK_RECEIVED",
         )
 
+        # Step 0: Ensure task is not in a terminal state
+        if task.status in {TaskStatus.COMPLETED, TaskStatus.CANCELLED}:
+            raise ValueError(f"Cannot execute task already in terminal state: {task.status.value}")
+
         # Step 1: Validate handler availability
         if clean_type not in self._handlers:
             err_msg = f"Unsupported task type '{clean_type}'. Supported: {list(self._handlers.keys())}"

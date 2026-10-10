@@ -81,7 +81,7 @@ class GeminiAIProvider:
             )
 
         key_val = self.api_key.get_secret_value()
-        endpoint = f"{self.base_url}/models/{self.model_name}:generateContent?key={key_val}"
+        endpoint = f"{self.base_url}/models/{self.model_name}:generateContent"
 
         req_body: Dict[str, Any] = {
             "contents": self._convert_messages(messages),
@@ -94,7 +94,10 @@ class GeminiAIProvider:
         req = urllib.request.Request(
             endpoint,
             data=data,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "x-goog-api-key": key_val,
+            },
             method="POST",
         )
 

@@ -123,6 +123,15 @@ class Checkpoint(BaseModel):
     git_commit_sha: Optional[str] = None
     git_branch: Optional[str] = None
 
+    @field_validator("checkpoint_id", "task_id")
+    @classmethod
+    def validate_id_format(cls, v: str) -> str:
+        clean = v.strip()
+        import re
+        if not re.match(r"^[a-zA-Z0-9_\-]+$", clean):
+            raise ValueError(f"Invalid characters in identifier: '{clean}'")
+        return clean
+
     @model_validator(mode="after")
     def sanitize_metadata(self) -> Checkpoint:
         from kanoman.logging.logger import redact_sensitive_text
