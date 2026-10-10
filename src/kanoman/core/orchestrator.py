@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
 from kanoman.config.settings import KanomanConfig, get_config
 from kanoman.core.models import Checkpoint, Task, TaskStatus
 from kanoman.core.registry import ProjectRegistry
-from kanoman.logging.logger import get_logger
+from kanoman.logging.logger import get_logger, redact_sensitive_text
 
 if TYPE_CHECKING:
     from kanoman.checkpoints.recovery import RecoveryEngine
@@ -140,10 +140,133 @@ class TaskOrchestrator:
                 "test_results": {"findings_count": report_dict["findings_count"]},
             }
 
+        def coordinate_agents_handler(
+            task: Task, config: KanomanConfig, registry: ProjectRegistry
+        ) -> Dict[str, Any]:
+            from kanoman.agents.coordinator import MultiAgentCoordinator, CoordinatorStatus
+            from kanoman.agents.models import AgentPlan, AgentPlanStep, AgentRole
+            from kanoman.agents.quality_gate import AgentQualityGate
+            from kanoman.agents.runners import (
+                ArchitectRunner,
+                CoderRunner,
+                SecurityAuditorRunner,
+                QAEngineerRunner,
+                execute_end_to_end_specialist_workflow,
+            )
+            from kanoman.ai.mock import MockAIProvider
+            from kanoman.git.controller import GitController
+
+            # Wire GitController if permitted remote is configured
+            git_ctrl = None
+            try:
+                git_ctrl = GitController(
+                    workspace_root=config.workspace_root,
+                    allowed_remote=config.git_allowed_remote,
+                    config=config,
+                )
+            except Exception:
+                pass
+
+            quality_gate = AgentQualityGate(workspace_root=config.workspace_root)
+            coordinator = MultiAgentCoordinator(
+                config=config,
+                recovery_engine=self.recovery,
+                git_controller=git_ctrl,
+                quality_gate=quality_gate,
+            )
+
+            use_specialists = bool(task.metadata.get("use_specialists", False)) if task.metadata else False
+
+            if use_specialists:
+                # Resolve provider
+                provider = None
+                if task.metadata and "ai_provider" in task.metadata:
+                    provider = task.metadata["ai_provider"]
+                else:
+                    prov_name = (
+                        task.metadata.get("provider", config.default_ai_provider)
+                        if task.metadata
+                        else config.default_ai_provider
+                    )
+                    if prov_name == "mock":
+                        provider = MockAIProvider()
+                    else:
+                        from kanoman.ai.router import AIRouter
+
+                        router = AIRouter(config=config)
+                        provider = router.get_provider(prov_name) or MockAIProvider()
+
+                architect = ArchitectRunner(provider)
+                coder = CoderRunner(provider)
+                auditor = SecurityAuditorRunner(provider)
+                qa = QAEngineerRunner(provider)
+
+                result = execute_end_to_end_specialist_workflow(
+                    task=task,
+                    coordinator=coordinator,
+                    architect=architect,
+                    coder=coder,
+                    auditor=auditor,
+                    qa=qa,
+                    quality_gate=quality_gate,
+                )
+            else:
+                # Build or retrieve plan
+                plan_data = task.metadata.get("plan") if task.metadata else None
+                if plan_data and isinstance(plan_data, dict):
+                    plan = AgentPlan.model_validate(plan_data)
+                elif plan_data and isinstance(plan_data, AgentPlan):
+                    plan = plan_data
+                else:
+                    step_arch = AgentPlanStep(
+                        step_id="step_arch",
+                        assigned_role=AgentRole.ARCHITECT,
+                        title="Architecture Review",
+                        description=task.description,
+                    )
+                    plan = AgentPlan(
+                        task_id=task.task_id,
+                        goal=task.title,
+                        steps=[step_arch],
+                        max_iterations=5,
+                    )
+
+                result = coordinator.execute_plan(task, plan)
+
+            # Map coordinator status to task result
+            if result.status == CoordinatorStatus.COMPLETED:
+                msg = (
+                    f"Multi-agent coordination completed successfully: "
+                    f"{len(result.decisions)} decision(s) recorded."
+                )
+                return {
+                    "message": msg,
+                    "coordinator_result": result.model_dump(),
+                    "test_results": {
+                        "status": result.status.value,
+                        "decisions_count": len(result.decisions),
+                        "iterations": result.iterations,
+                    },
+                }
+            elif result.status == CoordinatorStatus.REJECTED:
+                err_msg = result.error or "Proposal rejected by security or quality review."
+                raise ValueError(f"Multi-agent coordination rejected: {err_msg}")
+            elif result.status == CoordinatorStatus.ABORTED:
+                err_msg = result.error or "Coordination aborted by security veto."
+                raise ValueError(f"Multi-agent coordination aborted (security veto): {err_msg}")
+            elif result.status == CoordinatorStatus.TIMEOUT:
+                raise TimeoutError(f"Multi-agent coordination timed out: {result.error}")
+            elif result.status == CoordinatorStatus.CYCLE_DETECTED:
+                raise RuntimeError(f"Multi-agent coordination cycle detected: {result.error}")
+            else:
+                raise RuntimeError(f"Multi-agent coordination failed: {result.error}")
+
         self.register_handler("ping", ping_handler)
         self.register_handler("inspect_workspace", inspect_workspace_handler)
         self.register_handler("analyze_python", analyze_python_handler)
         self.register_handler("validate_markdown", validate_markdown_handler)
+        self.register_handler("coordinate_agents", coordinate_agents_handler)
+        self.register_handler("multi_agent", coordinate_agents_handler)
 
     def register_handler(self, task_type: str, handler: TaskHandler) -> None:
         """Register a custom task handler."""
@@ -205,7 +328,8 @@ class TaskOrchestrator:
                 status="TASK_COMPLETED",
             )
         except Exception as exc:
-            err_details = f"{exc.__class__.__name__}: {str(exc)}"
+            raw_err = f"{exc.__class__.__name__}: {str(exc)}"
+            err_details = redact_sensitive_text(raw_err)
             task.transition_to(TaskStatus.FAILED, error=err_details)
             task.result_summary = f"Execution failed: {err_details}"
 

@@ -55,6 +55,8 @@ def build_parser() -> argparse.ArgumentParser:
     run_t.add_argument("--desc", required=True, help="Task description.")
     run_t.add_argument("--type", default="ping", help="Task type (default: ping).")
     run_t.add_argument("--priority", default="MEDIUM", choices=["LOW", "MEDIUM", "HIGH", "CRITICAL"])
+    run_t.add_argument("--provider", default=None, choices=["mock", "gemini"], help="AI provider.")
+    run_t.add_argument("--use-specialists", action="store_true", help="Enable specialist runners.")
 
     # Subcommand: checkpoint
     chk_parser = subparsers.add_parser("checkpoint", help="Inspect recovery checkpoints.")
@@ -85,16 +87,34 @@ def build_parser() -> argparse.ArgumentParser:
     md_p.add_argument("--root", default=None, help="Authorized workspace root (default: config.workspace_root).")
     md_p.add_argument("--format", choices=["text", "json"], default="text", help="Output format (default: text).")
 
+    # Subcommand: agent
+    agent_parser = subparsers.add_parser("agent", help="Coordinate multi-agent workflows.")
+    agent_subs = agent_parser.add_subparsers(dest="agent_action")
+    coord_p = agent_subs.add_parser("coordinate", help="Coordinate multi-agent workflow for a task.")
+    coord_p.add_argument("--title", required=True, help="Task title (3-200 chars).")
+    coord_p.add_argument("--desc", required=True, help="Task description (5-4000 chars).")
+    coord_p.add_argument("--priority", default="MEDIUM", choices=["LOW", "MEDIUM", "HIGH", "CRITICAL"])
+    coord_p.add_argument("--provider", default=None, choices=["mock", "gemini"], help="AI provider.")
+    coord_p.add_argument("--max-iterations", type=int, default=5, help="Max iterations (1-20).")
+    coord_p.add_argument("--token-budget", type=int, default=50000, help="Max token budget (100-500000).")
+    coord_p.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
+    coord_p.add_argument("--no-specialists", action="store_true", help="Disable specialist persona runners.")
+
     # Subcommand: test
     subparsers.add_parser("test", help="Execute test suite via pytest.")
 
     return parser
 
 
-def main(args: list[str] | None = None) -> int:
+def main(
+    args: list[str] | None = None,
+    config: KanomanConfig | None = None,
+    orchestrator: TaskOrchestrator | None = None,
+) -> int:
     parser = build_parser()
     parsed = parser.parse_args(args)
-    config = get_config()
+    config = config or get_config()
+    active_orch = orchestrator or TaskOrchestrator(config=config)
 
     if not parsed.subcommand:
         parser.print_help()
@@ -141,13 +161,18 @@ def main(args: list[str] | None = None) -> int:
 
     elif parsed.subcommand == "task":
         if parsed.task_action == "run":
-            orchestrator = TaskOrchestrator(config=config)
+            metadata = {}
+            if getattr(parsed, "use_specialists", False):
+                metadata["use_specialists"] = True
+            if getattr(parsed, "provider", None):
+                metadata["provider"] = parsed.provider
             task = Task(
                 title=parsed.title,
                 description=parsed.desc,
                 priority=TaskPriority[parsed.priority],
+                metadata=metadata,
             )
-            finished = orchestrator.execute_task(task, task_type=parsed.type)
+            finished = active_orch.execute_task(task, task_type=parsed.type)
             print(f"Task ID:     {finished.task_id}")
             print(f"Status:      {finished.status.value}")
             print(f"Result:      {finished.result_summary}")
@@ -263,6 +288,64 @@ def main(args: list[str] | None = None) -> int:
                 print("All files passed analysis cleanly.")
 
         return 1 if report.has_high_or_critical else 0
+
+    elif parsed.subcommand == "agent":
+        if parsed.agent_action == "coordinate":
+            # Input validation and bounding
+            title = parsed.title.strip() if parsed.title else ""
+            desc = parsed.desc.strip() if parsed.desc else ""
+            if len(title) < 3 or len(title) > 200:
+                print("Error: Task title must be between 3 and 200 characters.", file=sys.stderr)
+                return 2
+            if len(desc) < 5 or len(desc) > 4000:
+                print("Error: Task description must be between 5 and 4000 characters.", file=sys.stderr)
+                return 2
+            if parsed.max_iterations < 1 or parsed.max_iterations > 20:
+                print("Error: max-iterations must be between 1 and 20.", file=sys.stderr)
+                return 2
+            if parsed.token_budget < 100 or parsed.token_budget > 500000:
+                print("Error: token-budget must be between 100 and 500000.", file=sys.stderr)
+                return 2
+
+            prov_name = (parsed.provider or config.default_ai_provider).lower()
+            task = Task(
+                title=title,
+                description=desc,
+                priority=TaskPriority[parsed.priority],
+                metadata={
+                    "use_specialists": not parsed.no_specialists,
+                    "provider": prov_name,
+                    "max_iterations": parsed.max_iterations,
+                    "token_budget": parsed.token_budget,
+                },
+            )
+
+            finished = active_orch.execute_task(task, task_type="coordinate_agents")
+            is_success = (finished.status.value == "COMPLETED")
+
+            if parsed.format == "json":
+                output_payload = {
+                    "task_id": finished.task_id,
+                    "status": finished.status.value,
+                    "result_summary": finished.result_summary,
+                    "checkpoint_id": finished.checkpoint_id,
+                    "is_successful": is_success,
+                    "sanitized_error": finished.sanitized_error,
+                }
+                print(json.dumps(output_payload, indent=2))
+            else:
+                print("=== Kanoman Multi-Agent Coordination Result ===")
+                print(f"Task ID:        {finished.task_id}")
+                print(f"Status:         {finished.status.value}")
+                print(f"Result Summary: {finished.result_summary or 'No summary'}")
+                print(f"Checkpoint:     {finished.checkpoint_id or 'None'}")
+                if finished.sanitized_error:
+                    print(f"Error:          {finished.sanitized_error}")
+
+            return 0 if is_success else 1
+        else:
+            print("Please specify an agent action, e.g.: kanoman agent coordinate", file=sys.stderr)
+            return 1
 
     elif parsed.subcommand == "test":
         import pytest

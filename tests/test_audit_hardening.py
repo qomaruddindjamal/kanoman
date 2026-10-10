@@ -146,3 +146,64 @@ def test_project_registry_persistence_and_root_validation(tmp_path: Path):
     retrieved = registry2.get_project("persistent_proj")
     assert retrieved is not None
     assert retrieved.name == "Persistent Project"
+
+
+def test_quality_gate_blocks_filesystem_symlink_escape(tmp_path: Path) -> None:
+    import os
+    from kanoman.agents.quality_gate import AgentQualityGate
+
+    ws = tmp_path / "workspace"
+    ws.mkdir()
+    outside_dir = tmp_path / "outside"
+    outside_dir.mkdir()
+    target_file = outside_dir / "target.py"
+    target_file.write_text("x = 100\n", encoding="utf-8")
+
+    link_file = ws / "symlink_escape.py"
+    try:
+        os.symlink(target_file, link_file)
+    except OSError:
+        pytest.skip("Symlink creation not permitted in this OS environment.")
+
+    gate = AgentQualityGate(workspace_root=ws)
+    with pytest.raises(ValueError, match="resolves outside workspace root|Symlink escape detected"):
+        gate.validate_target_path("symlink_escape.py")
+
+
+def test_recovery_rejects_task_id_mismatch(tmp_path: Path) -> None:
+    from kanoman.core.models import Checkpoint
+
+    engine = RecoveryEngine(tmp_path)
+    task = Task(task_id="task_genuine_01", title="Genuine Task", description="Testing mismatch.")
+    chk_foreign = Checkpoint(
+        task_id="task_foreign_99",
+        project_id="kanoman",
+        status=TaskStatus.RUNNING.value,
+        change_summary="Foreign checkpoint payload.",
+    )
+
+    with pytest.raises(ValueError, match="Checkpoint task_id mismatch"):
+        engine.resume_task(task, chk_foreign)
+
+
+def test_recovery_rejects_terminal_task_resumption(tmp_path: Path) -> None:
+    from kanoman.core.models import Checkpoint
+
+    engine = RecoveryEngine(tmp_path)
+
+    # Test COMPLETED task
+    task_done = Task(task_id="task_done_01", title="Done Task", description="Testing terminal.")
+    task_done.transition_to(TaskStatus.RUNNING)
+    task_done.transition_to(TaskStatus.COMPLETED)
+    chk = Checkpoint(task_id="task_done_01", status="COMPLETED", change_summary="Completed.")
+
+    with pytest.raises(ValueError, match="Cannot resume a terminal task in status COMPLETED"):
+        engine.resume_task(task_done, chk)
+
+    # Test CANCELLED task
+    task_cancelled = Task(task_id="task_cancel_01", title="Cancelled Task", description="Testing cancel.")
+    task_cancelled.transition_to(TaskStatus.CANCELLED)
+    chk_cancel = Checkpoint(task_id="task_cancel_01", status="CANCELLED", change_summary="Cancelled.")
+
+    with pytest.raises(ValueError, match="Cannot resume a terminal task in status CANCELLED"):
+        engine.resume_task(task_cancelled, chk_cancel)
