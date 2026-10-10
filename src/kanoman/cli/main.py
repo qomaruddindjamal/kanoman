@@ -51,6 +51,7 @@ def build_parser() -> argparse.ArgumentParser:
     task_parser = subparsers.add_parser("task", help="Execute tasks.")
     task_subs = task_parser.add_subparsers(dest="task_action")
     run_t = task_subs.add_parser("run", help="Run a task through the orchestrator.")
+    run_t.add_argument("--project-id", default=None, help="Target project identifier registered with Kanoman.")
     run_t.add_argument("--title", required=True, help="Task title.")
     run_t.add_argument("--desc", required=True, help="Task description.")
     run_t.add_argument("--type", default="ping", help="Task type (default: ping).")
@@ -91,6 +92,7 @@ def build_parser() -> argparse.ArgumentParser:
     agent_parser = subparsers.add_parser("agent", help="Coordinate multi-agent workflows.")
     agent_subs = agent_parser.add_subparsers(dest="agent_action")
     coord_p = agent_subs.add_parser("coordinate", help="Coordinate multi-agent workflow for a task.")
+    coord_p.add_argument("--project-id", default=None, help="Target project identifier registered with Kanoman.")
     coord_p.add_argument("--title", required=True, help="Task title (3-200 chars).")
     coord_p.add_argument("--desc", required=True, help="Task description (5-4000 chars).")
     coord_p.add_argument("--priority", default="MEDIUM", choices=["LOW", "MEDIUM", "HIGH", "CRITICAL"])
@@ -114,7 +116,8 @@ def main(
     parser = build_parser()
     parsed = parser.parse_args(args)
     config = config or get_config()
-    active_orch = orchestrator or TaskOrchestrator(config=config)
+    shared_registry = ProjectRegistry(storage_file=config.workspace_root / ".kanoman_projects.json")
+    active_orch = orchestrator or TaskOrchestrator(config=config, registry=shared_registry)
 
     if not parsed.subcommand:
         parser.print_help()
@@ -137,7 +140,7 @@ def main(
         return 0
 
     elif parsed.subcommand == "project":
-        registry = ProjectRegistry(storage_file=config.workspace_root / ".kanoman_projects.json")
+        registry = shared_registry
         if parsed.proj_action == "list":
             projects = registry.list_projects()
             print(f"Registered Projects ({len(projects)}):")
@@ -166,9 +169,11 @@ def main(
                 metadata["use_specialists"] = True
             if getattr(parsed, "provider", None):
                 metadata["provider"] = parsed.provider
+            proj_id = getattr(parsed, "project_id", None)
             task = Task(
                 title=parsed.title,
                 description=parsed.desc,
+                project_id=proj_id,
                 priority=TaskPriority[parsed.priority],
                 metadata=metadata,
             )
@@ -308,9 +313,11 @@ def main(
                 return 2
 
             prov_name = (parsed.provider or config.default_ai_provider).lower()
+            proj_id = getattr(parsed, "project_id", None)
             task = Task(
                 title=title,
                 description=desc,
+                project_id=proj_id,
                 priority=TaskPriority[parsed.priority],
                 metadata={
                     "use_specialists": not parsed.no_specialists,

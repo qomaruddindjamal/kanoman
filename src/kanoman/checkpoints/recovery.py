@@ -95,11 +95,25 @@ class RecoveryEngine:
         return candidates[0]
 
     def resume_task(self, task: Task, checkpoint: Checkpoint) -> Task:
-        """Resume a task state safely from a checkpoint snapshot."""
+        """Resume a task state safely from a checkpoint snapshot.
+
+        Enforces task_id matching, project_id identity consistency, and safe FSM transitions.
+        Fail-closed:
+        - If task.project_id and checkpoint.project_id differ, raise ValueError.
+        - If one is defined and the other is None, raise ValueError to prevent cross-context hijacking.
+        - If both are None or match, resume proceeds safely.
+        """
         if checkpoint.task_id != task.task_id:
             raise ValueError(
                 f"Checkpoint task_id mismatch: checkpoint has '{checkpoint.task_id}', "
                 f"task has '{task.task_id}'"
+            )
+
+        # Enforce strict project_id identity matching
+        if task.project_id != checkpoint.project_id:
+            raise ValueError(
+                f"Checkpoint project_id mismatch: task has '{task.project_id}', "
+                f"checkpoint has '{checkpoint.project_id}'. Fail-closed: refusing cross-project resume."
             )
 
         # Ensure safe state transition

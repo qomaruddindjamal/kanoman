@@ -73,19 +73,66 @@ def create_mcp_server(
         return json.dumps(data, indent=2)
 
     @server.tool()
-    def kanoman_run_task(title: str, description: str, task_type: str = "ping") -> str:
+    def kanoman_run_task(
+        title: str,
+        description: str,
+        task_type: str = "ping",
+        project_id: Optional[str] = None,
+    ) -> str:
         """Execute a validated development task within Kanoman Orchestrator."""
-        task = Task(title=title, description=description, priority=TaskPriority.MEDIUM)
-        finished = active_orchestrator.execute_task(task, task_type=task_type)
-        return json.dumps(
-            {
-                "task_id": finished.task_id,
-                "status": finished.status.value,
-                "result_summary": finished.result_summary,
-                "checkpoint_id": finished.checkpoint_id,
-            },
-            indent=2,
-        )
+        if not isinstance(title, str) or not isinstance(description, str):
+            return json.dumps(
+                {"is_successful": False, "error": "Invalid argument types: title and description must be strings."},
+                indent=2,
+            )
+        clean_project_id = project_id.strip() if isinstance(project_id, str) and project_id.strip() else None
+        if clean_project_id:
+            if not registry.get_project(clean_project_id):
+                return json.dumps(
+                    {
+                        "task_id": None,
+                        "status": "FAILED",
+                        "result_summary": None,
+                        "checkpoint_id": None,
+                        "is_successful": False,
+                        "error": f"Validation failed: unknown project_id '{clean_project_id}'. Fail-closed.",
+                    },
+                    indent=2,
+                )
+
+        try:
+            task = Task(
+                title=title.strip(),
+                description=description.strip(),
+                project_id=clean_project_id,
+                priority=TaskPriority.MEDIUM,
+            )
+            finished = active_orchestrator.execute_task(task, task_type=task_type)
+            is_success = (finished.status.value == "COMPLETED")
+            return json.dumps(
+                {
+                    "task_id": finished.task_id,
+                    "status": finished.status.value,
+                    "result_summary": finished.result_summary,
+                    "checkpoint_id": finished.checkpoint_id,
+                    "is_successful": is_success,
+                    "error": finished.sanitized_error,
+                },
+                indent=2,
+            )
+        except Exception as exc:
+            sanitized = redact_sensitive_text(str(exc))
+            return json.dumps(
+                {
+                    "task_id": None,
+                    "status": "FAILED",
+                    "result_summary": None,
+                    "checkpoint_id": None,
+                    "is_successful": False,
+                    "error": sanitized,
+                },
+                indent=2,
+            )
 
     @server.tool()
     def kanoman_git_inspect() -> str:
@@ -117,6 +164,7 @@ def create_mcp_server(
         max_iterations: int = 5,
         use_specialists: bool = True,
         provider: str = "mock",
+        project_id: Optional[str] = None,
     ) -> str:
         """Run multi-agent coordination workflow with specialist personas and quality gate."""
         if not isinstance(title, str) or not isinstance(description, str):
@@ -151,10 +199,26 @@ def create_mcp_server(
                 indent=2,
             )
 
+        clean_project_id = project_id.strip() if isinstance(project_id, str) and project_id.strip() else None
+        if clean_project_id:
+            if not registry.get_project(clean_project_id):
+                return json.dumps(
+                    {
+                        "task_id": None,
+                        "status": "FAILED",
+                        "result_summary": None,
+                        "checkpoint_id": None,
+                        "is_successful": False,
+                        "error": f"Validation failed: unknown project_id '{clean_project_id}'. Fail-closed.",
+                    },
+                    indent=2,
+                )
+
         try:
             task = Task(
                 title=clean_title,
                 description=clean_desc,
+                project_id=clean_project_id,
                 priority=TaskPriority.MEDIUM,
                 metadata={
                     "use_specialists": bool(use_specialists),

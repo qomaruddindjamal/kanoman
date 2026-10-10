@@ -39,25 +39,56 @@ class TaskOrchestrator:
         self._handlers: Dict[str, TaskHandler] = {}
         self._register_default_handlers()
 
+    def resolve_project_context(
+        self,
+        task: Task,
+    ) -> tuple[Path, Optional[str], Optional[list[str]], bool]:
+        """Resolve workspace root, allowed remote, allowed branches, and dry-run policy for a task.
+
+        Fail-closed: If task specifies project_id, it must exist in self.registry.
+        If project_id is not specified (None or empty), falls back to global Kanoman configuration.
+        """
+        if task.project_id:
+            proj = self.registry.get_project(task.project_id)
+            if not proj:
+                raise ValueError(
+                    f"Project '{task.project_id}' not found in registry. Fail-closed: refusing execution."
+                )
+            return (
+                proj.workspace_root.resolve(),
+                proj.allowed_remote_url,
+                [proj.policy_branch],
+                proj.git_dry_run_policy,
+            )
+        return (
+            self.config.workspace_root.resolve(),
+            self.config.git_allowed_remote,
+            self.config.git_allowed_branches,
+            self.config.git_dry_run,
+        )
+
     def _register_default_handlers(self) -> None:
         """Register built-in safe task handlers."""
 
         def ping_handler(task: Task, config: KanomanConfig, registry: ProjectRegistry) -> Dict[str, Any]:
+            ws_root, _, _, _ = self.resolve_project_context(task)
             return {
                 "message": "Kanoman Core alive and operational.",
                 "env": config.env.value,
-                "workspace": str(config.workspace_root),
+                "workspace": str(ws_root),
+                "project_id": task.project_id,
             }
 
         def inspect_workspace_handler(
             task: Task, config: KanomanConfig, registry: ProjectRegistry
         ) -> Dict[str, Any]:
-            root = config.workspace_root
-            exists = root.is_dir()
+            ws_root, _, _, _ = self.resolve_project_context(task)
+            exists = ws_root.is_dir()
             return {
-                "workspace_root": str(root),
+                "workspace_root": str(ws_root),
                 "is_dir": exists,
                 "project_count": len(registry.list_projects()),
+                "project_id": task.project_id,
             }
 
         def analyze_python_handler(
@@ -66,11 +97,12 @@ class TaskOrchestrator:
             from pathlib import Path
             from kanoman.analysis.python_analyzer import PythonASTAnalyzer
 
-            analyzer = PythonASTAnalyzer(workspace_root=config.workspace_root)
+            ws_root, _, _, _ = self.resolve_project_context(task)
+            analyzer = PythonASTAnalyzer(workspace_root=ws_root)
             raw_target = task.metadata.get("target_path") if task.metadata else None
-            target = Path(raw_target) if raw_target else config.workspace_root
+            target = Path(raw_target) if raw_target else ws_root
             if not target.is_absolute():
-                target = (config.workspace_root / target).resolve()
+                target = (ws_root / target).resolve()
 
             if target.is_file():
                 findings = analyzer.analyze_file(target)
@@ -106,11 +138,12 @@ class TaskOrchestrator:
             from pathlib import Path
             from kanoman.analysis.markdown_validator import MarkdownValidator
 
-            validator = MarkdownValidator(workspace_root=config.workspace_root)
+            ws_root, _, _, _ = self.resolve_project_context(task)
+            validator = MarkdownValidator(workspace_root=ws_root)
             raw_target = task.metadata.get("target_path") if task.metadata else None
-            target = Path(raw_target) if raw_target else config.workspace_root
+            target = Path(raw_target) if raw_target else ws_root
             if not target.is_absolute():
-                target = (config.workspace_root / target).resolve()
+                target = (ws_root / target).resolve()
 
             if target.is_file():
                 findings = validator.validate_file(target)
@@ -156,18 +189,22 @@ class TaskOrchestrator:
             from kanoman.ai.mock import MockAIProvider
             from kanoman.git.controller import GitController
 
-            # Wire GitController if permitted remote is configured
-            git_ctrl = None
-            try:
-                git_ctrl = GitController(
-                    workspace_root=config.workspace_root,
-                    allowed_remote=config.git_allowed_remote,
-                    config=config,
-                )
-            except Exception:
-                pass
+            ws_root, allowed_remote, allowed_branches, dry_run = self.resolve_project_context(task)
 
-            quality_gate = AgentQualityGate(workspace_root=config.workspace_root)
+            # Wire GitController if permitted remote is configured for this project
+            git_ctrl = None
+            if allowed_remote:
+                try:
+                    git_ctrl = GitController(
+                        workspace_root=ws_root,
+                        allowed_remote=allowed_remote,
+                        allowed_branches=allowed_branches,
+                        config=config,
+                    )
+                except Exception:
+                    pass
+
+            quality_gate = AgentQualityGate(workspace_root=ws_root)
             coordinator = MultiAgentCoordinator(
                 config=config,
                 recovery_engine=self.recovery,
