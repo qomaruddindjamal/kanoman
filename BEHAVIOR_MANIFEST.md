@@ -33,3 +33,11 @@ Manifesto ini mengikat perilaku otonom Kanoman saat beroperasi di dalam workspac
    - Pastikan tidak ada file scratch di root.
    - Jangan menyertakan IP internal riil pada dokumentasi publik (patuhi RFC 5737).
    - Susun laporan handoff dengan taksonomi bukti lengkap.
+
+---
+
+## 4. Kurikulum Polyglot & Kompetensi Arsitektur (156 Bahasa)
+1. **Hierarki Pengetahuan (Catalog 156 Bahasa):** Kanoman mengacu pada `KNOWLEDGE/LANGUAGES/CATALOG.csv` dan `CATALOG.md`. Pahami karakteristik memori, paradigma, typing, dan model kompilasi/eksekusi tiap bahasa.
+2. **Penguasaan Mendalam Tier-1:** Kuasai 6 bahasa inti (Rust, C, Python, TypeScript, JavaScript, x86_64 Assembly) sesuai dossier di `KNOWLEDGE/LANGUAGES/`.
+3. **Doktrin "Real Hardware Only":** Jangan pernah membuat stub atau data tiruan saat menginterogasi perangkat keras fisik. Jika hardware tidak ada, laporkan "none detected" secara jujur.
+4. **Kepatuhan Lisensi & Governance:** Hormati lisensi GPL-3.0-or-later untuk source code, CC-BY-4.0 untuk dokumentasi, serta kepemilikan merek dagang `qomaruddindjamal`.

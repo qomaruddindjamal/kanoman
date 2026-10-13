@@ -1,0 +1,157 @@
+id,name,family,paradigm,first_appeared,typing,execution,primary_use,tier,status
+1,Rust,C-family/ML,Multi-paradigm (imperative functional concurrent),2015,Static strong affine,Compiled (LLVM native),Systems safe-concurrency OS,1,CANONICAL
+2,C,C-family,Imperative procedural,1972,Static weak,Compiled native,Systems OS embedded drivers,1,CANONICAL
+3,Python,ABC-family,Multi-paradigm (OOP functional imperative),1991,Dynamic strong,Interpreted byte-compiled,AI/ML data tooling orchestration,1,CANONICAL
+4,TypeScript,C-family/JS,Multi-paradigm (OOP functional imperative),2012,Static gradual,Transpiled to JS (V8/Node),Web backend frontend enterprise,1,CANONICAL
+5,JavaScript,C-family/Self,Multi-paradigm (event-driven functional prototype),1995,Dynamic weak,JIT/Interpreted,Web browser Node runtime,1,CANONICAL
+6,x86_64 Assembly,Machine,Imperative low-level,1978,Untyped,Assembled native,Bootloader trap dispatch ISR,1,CANONICAL
+7,ARM64 Assembly,Machine,Imperative RISC,2011,Untyped,Assembled native,Avionics ARM embedded boot,2,CURATED
+8,RISC-V Assembly,Machine,Imperative open-ISA,2010,Untyped,Assembled native,Open hardware avionics low-level,2,CURATED
+9,C++,C-family,Multi-paradigm (OOP generic imperative),1985,Static strong,Compiled native,Game engines browsers low-latency,2,CURATED
+10,Go,C-family,Concurrent imperative,2009,Static strong,Compiled native,Cloud microservices networking CLI,2,CURATED
+11,Java,C-family,OOP concurrent class-based,1995,Static strong,Bytecode JVM JIT,Enterprise carrier billing backend,2,CURATED
+12,Kotlin,C-family/ML,Multi-paradigm (OOP functional),2011,Static strong,JVM / Native / JS,Android modern serverless,2,CURATED
+13,Swift,C-family/ML,Multi-paradigm (protocol-oriented functional),2014,Static strong,Compiled native (LLVM),Apple ecosystem server-side,2,CURATED
+14,C#,C-family,Multi-paradigm (OOP component-oriented),2000,Static strong,CLI .NET CLR JIT,Enterprise game backend services,2,CURATED
+15,Zig,C-family,Imperative systems,2016,Static strong comptime,Compiled native (LLVM),Toolchain low-level replacement,2,CURATED
+16,Ada / SPARK,Pascal-family,Multi-paradigm concurrent safe,1980,Static strong nominal,Compiled native,Avionics DO-178C space defense,2,CURATED
+17,Haskell,ML-family,Pure functional lazy,1990,Static strong inferred,Compiled (GHC native),Formal verification compilers math,2,CURATED
+18,OCaml,ML-family,Multi-paradigm functional imperative,1996,Static strong inferred,Compiled native / bytecode,Static analysis theorem proving,2,CURATED
+19,Erlang,Prolog/Telecom,Concurrent actor-model functional,1986,Dynamic strong,BEAM VM,Telecom carrier switches 99.999%,2,CURATED
+20,Elixir,Ruby/Erlang,Concurrent functional,2011,Dynamic strong,BEAM VM,High-concurrency web telecom APIs,2,CURATED
+21,Lua,Self-family,Multi-paradigm prototype-based,1993,Dynamic strong,Interpreted / LuaJIT,Game scripting embedded redis NGINX,2,CURATED
+22,Julia,Lisp/Scientific,Multiple-dispatch numerical,2012,Dynamic optional-type,JIT (LLVM),High-performance computing scientific,2,CURATED
+23,R,S-family,Array functional statistical,1993,Dynamic,Interpreted,Biostatistics data analytics,2,CURATED
+24,Scala,C-family/ML,Multi-paradigm (OOP functional),2004,Static strong,JVM bytecode,Big data Spark distributed,2,CURATED
+25,Clojure,Lisp-family,Functional concurrent,2007,Dynamic strong,JVM / JS,Data transformation immutability,2,CURATED
+26,Common Lisp,Lisp-family,Multi-paradigm symbolic,1984,Dynamic strong,Compiled / Interpreted,Symbolic AI CAD compilers,2,CURATED
+27,Scheme,Lisp-family,Functional minimalistic,1975,Dynamic strong,Interpreted / Compiled,CS education language research,2,CURATED
+28,Racket,Lisp-family,Language-oriented functional,1995,Dynamic / Typed,JIT bytecode,Language design DSL research,2,CURATED
+29,Prolog,Logic-family,Declarative logic,1972,Dynamic,Interpreted (WAM),Constraint solving expert systems,2,CURATED
+30,SQL,Relational,Declarative relational,1974,Static declarative,Engine query executor,Database querying RDBMS,2,CURATED
+31,Bash / Shell,Unix-sh,Command imperative scripting,1989,Untyped dynamic,Interpreted,Sysadmin CI/CD automation,2,CURATED
+32,PowerShell,Monad-family,Object-oriented task automation,2006,Dynamic / Gradual,CLR .NET execution,Windows systems admin automation,2,CURATED
+33,Perl,Unix-scripting,Multi-paradigm procedural string,1987,Dynamic,Interpreted,Text processing legacy automation,2,CURATED
+34,Ruby,Smalltalk/Perl,OOP pure object-oriented,1995,Dynamic strong,Interpreted (YARV),Web development (Rails) DevOps,2,CURATED
+35,PHP,C-family,Imperative web backend,1995,Dynamic gradual,Interpreted / Zend opcode,Web hosting CMS servers,2,CURATED
+36,Dart,C-family,OOP class-based single-inheritance,2011,Static strong sound,AOT compiled / JIT (Flutter),Cross-platform mobile UI,2,CURATED
+37,Fortran,Algebraic,Imperative array-oriented,1957,Static strong,Compiled native,Supercomputing weather physics,2,CURATED
+38,COBOL,Business-English,Procedural record-oriented,1959,Static weak,Compiled native,Banking mainframe transaction,2,CURATED
+39,Nim,Python/Pascal,Multi-paradigm meta-programming,2008,Static strong inferred,Transpiled to C/C++ native,Systems games utilities,3,CATALOGUED
+40,Crystal,Ruby-like,OOP compiled,2014,Static strong inferred,Compiled native (LLVM),High-perf web tooling,3,CATALOGUED
+41,D,C-family,Multi-paradigm systems,2001,Static strong,Compiled native,Systems high-performance,3,CATALOGUED
+42,V,Go/Rust-like,Imperative simple,2019,Static strong,Compiled native,Fast compilation tooling,3,CATALOGUED
+43,Hare,C-family,Imperative systems minimal,2022,Static strong,Compiled native (qbe),Minimal Unix systems,3,CATALOGUED
+44,Odin,C-family,Imperative data-oriented,2016,Static strong,Compiled native (LLVM),Game dev graphics high-perf,3,CATALOGUED
+45,Zig-CC,Toolchain,C/C++ drop-in cross-compiler,2016,Toolchain,Native binary,Cross-platform bootstrapping,3,CATALOGUED
+46,F#,ML-family,Functional-first multi-paradigm,2005,Static strong inferred,CLR .NET bytecode,Finance analytics domain modeling,3,CATALOGUED
+47,Standard ML,ML-family,Functional strict,1990,Static strong inferred,Compiled native,Theorem proving compiler theory,3,CATALOGUED
+48,Idris,ML-family,Pure functional dependent-typed,2011,Static dependent,Compiled native / C / JS,Type-driven development proof,3,CATALOGUED
+49,Agda,ML-family,Functional dependent-typed,2007,Static dependent,Interpreted / Haskell backend,Constructive mathematics proof,3,CATALOGUED
+50,Coq / Gallina,Calculus of Const.,Formal verification proof assistant,1989,Static dependent,Verified extraction (OCaml),Avionics OS kernel verification,3,CATALOGUED
+51,Isabelle/HOL,Higher-Order Logic,Proof assistant,1986,Typed logic,Standard ML execution,Microkernel seL4 formal proof,3,CATALOGUED
+52,Lean 4,Type Theory,Functional theorem prover,2013,Static dependent,Compiled C++ native,Math formalization AI reasoning,3,CATALOGUED
+53,TLA+,Temporal Logic,Specification logic,1999,Untyped first-order,TLC model checker,Distributed consensus avionics specs,3,CATALOGUED
+54,Alloy,Relational Logic,Declarative modeling,1997,Relational,SAT solver analysis,Security protocol structural models,3,CATALOGUED
+55,Verilog,HDL,Hardware description concurrent,1984,Hardware types,Simulated / Synthesized,FPGA ASIC switching fabric,3,CATALOGUED
+56,SystemVerilog,HDL,Hardware verification OOP,2002,Hardware types,Simulated / Synthesized,Carrier ASIC verification (UVM),3,CATALOGUED
+57,VHDL,Ada-family HDL,Hardware description strongly-typed,1980,Static strong,Simulated / Synthesized,Aerospace military FPGA DO-254,3,CATALOGUED
+58,Chisel,Scala-embedded,Hardware construction,2012,Static typed,Synthesized to Verilog,RISC-V core generation,3,CATALOGUED
+59,SpinalHDL,Scala-embedded,Hardware description,2015,Static typed,Synthesized to VHDL/Verilog,Modern FPGA design,3,CATALOGUED
+60,Bluespec BSV,Haskell-family HDL,Rule-based hardware description,2000,Static strong,Synthesized native,Formal hardware accelerators,3,CATALOGUED
+61,CUDA C++,C-family,GPGPU parallel SIMT,2007,Static strong,Compiled PTX/native GPU,AI neural network packet offload,3,CATALOGUED
+62,OpenCL C,C-family,Heterogeneous compute,2009,Static strong,Compiled SPIR-V/device,Cross-vendor accelerator compute,3,CATALOGUED
+63,HIP,C-family,AMD ROCm GPU compute,2016,Static strong,Compiled AMDGPU native,GPU carrier line-rate offload,3,CATALOGUED
+64,Metal Shading Lang,C-family,GPU shading and compute,2014,Static strong,Compiled AIR,Apple GPU acceleration,3,CATALOGUED
+65,HLSL,C-family,Graphics shading,2002,Static strong,Compiled DXBC/DXIL,DirectX GPU computation,3,CATALOGUED
+66,GLSL,C-family,Graphics shading,2004,Static strong,Compiled SPIR-V,OpenGL Vulkan shader,3,CATALOGUED
+67,WGSL,Rust/C-family,WebGPU shading,2020,Static strong,Compiled SPIR-V/MSL,Browser-native GPU pipelines,3,CATALOGUED
+68,WebAssembly (Wasm),Stack-machine,Low-level portable bytecode,2017,Static strong linear,JIT/AOT runtime (Wasmtime),Sandboxed router plugins edge,3,CATALOGUED
+69,WAT,Wasm-text,S-expression bytecode repr,2017,Static linear,Assembled to Wasm,Wasm debugging edge tuning,3,CATALOGUED
+70,LLVM IR,Assembly-like,Universal compiler intermediate,2003,Static strongly-typed,JIT / AOT backend emit,Cross-target optimization,3,CATALOGUED
+71,SPIR-V,Intermediate,Standard parallel compute IR,2015,Static binary,Device driver consumed,GPU compute shaders Vulkan,3,CATALOGUED
+72,eBPF Assembly,Instruction set,In-kernel sandboxed bytecode,2014,Static verified,Kernel JIT (Linux/ASL verifier),Packet filter tracing security,3,CATALOGUED
+73,s390x Assembly,Machine,Mainframe CISC,1964,Untyped,Assembled native,IBM z/Architecture carrier core,3,CATALOGUED
+74,POWER10 Assembly,Machine,PowerPC RISC,2021,Untyped,Assembled native,IBM enterprise switching compute,3,CATALOGUED
+75,LoongArch Assembly,Machine,Loongson RISC,2021,Untyped,Assembled native,Indigenous carrier hardware China,3,CATALOGUED
+76,SPARC V9 Assembly,Machine,OpenSPARC RISC,1993,Untyped,Assembled native,Avionics radar legacy space,3,CATALOGUED
+77,MIPS64 Assembly,Machine,MIPS RISC,1991,Untyped,Assembled native,Cavium Octeon router linecards,3,CATALOGUED
+78,ColdFire Assembly,Machine,Motorola 68k variant,1994,Untyped,Assembled native,Legacy telecom embedded,3,CATALOGUED
+79,AVR Assembly,Machine,Atmel 8-bit RISC,1996,Untyped,Assembled native,Microcontroller telemetry sensor,3,CATALOGUED
+80,PIC Assembly,Machine,Microchip 8/16-bit,1976,Untyped,Assembled native,Hardware watchdog controller,3,CATALOGUED
+81,Intel 8051 Assembly,Machine,Harvard architecture CISC,1980,Untyped,Assembled native,Optical transceiver SFP controller,3,CATALOGUED
+82,Solidity,C-family/JS,Contract-oriented blockchain,2014,Static strong,EVM bytecode,Decentralized state machines,3,CATALOGUED
+83,Vyper,Python-family,Security-audited contract,2017,Static strong,EVM bytecode,Zero-overflow state logic,3,CATALOGUED
+84,Move,Rust-family,Resource-oriented linear logic,2019,Static strong linear,Move bytecode,Asset ownership safety rules,3,CATALOGUED
+85,Cairo,Stark-family,Provable STARK computation,2020,Non-deterministic algebraic,Cairo VM,Zero-knowledge telemetry proof,3,CATALOGUED
+86,Smalltalk,Smalltalk,Pure OOP reflective,1972,Dynamic,Image-based bytecode,GUI origins live debugging,3,CATALOGUED
+87,Eiffel,Pascal/Algol,Design by Contract OOP,1985,Static strong,Compiled native,High-integrity software contracts,3,CATALOGUED
+88,Modula-2,Pascal-family,Modular systems,1978,Static strong,Compiled native,Embedded real-time heritage,3,CATALOGUED
+89,Modula-3,Modula-family,Systems OOP safe concurrency,1989,Static strong,Compiled native,Network objects OS research,3,CATALOGUED
+90,Oberon,Pascal-family,Minimalist extensible OS,1987,Static strong,Compiled native,ETH Zurich OS/language co-design,3,CATALOGUED
+91,Simula 67,Algol-family,First OOP discrete simulation,1967,Static strong,Compiled native,Queueing network modeling,3,CATALOGUED
+92,Algol 60,Algol-family,Structured imperative,1960,Static,Compiled native,Grammar BNF structured control,3,CATALOGUED
+93,Algol 68,Algol-family,Orthogonal imperative,1968,Static strong,Compiled native,Type orthodoxy compiler theory,3,CATALOGUED
+94,Pascal,Algol-family,Structured education/systems,1970,Static strong,Compiled native / P-code,Compiler education historical systems,3,CATALOGUED
+95,PL/I,Algol/Fortran/COBOL,Multi-purpose enterprise,1964,Static,Compiled native,Multics OS IBM transaction,3,CATALOGUED
+96,APL,Array-family,Tacit array symbolic,1966,Dynamic,Interpreted,Quantitative finance matrix math,3,CATALOGUED
+97,BQN,Array-family,Tacit array modern,2020,Dynamic,Interpreted / JIT,Data pipeline high density math,3,CATALOGUED
+98,J,APL-family,Tacit functional array,1990,Dynamic,Interpreted,High density statistical analysis,3,CATALOGUED
+99,K,APL-family,High-perf array database,1993,Dynamic,Interpreted (kdb+),Ultra-low-latency tick data,3,CATALOGUED
+100,Q,K-family,Array query language,2003,Dynamic strong,Interpreted (kdb+ engine),High-frequency trading telemetry,3,CATALOGUED
+101,Forth,Stack-family,Concatenative stack-based,1970,Untyped,Interpreted / Native threaded,OpenFirmware boot PROM embedded,3,CATALOGUED
+102,Factor,Forth-family,Concatenative extensible,2003,Dynamic,JIT native,Modern stack-based research,3,CATALOGUED
+103,PostScript,Forth-family,Stack-based page description,1982,Dynamic,Interpreted,Printing graphics document engine,3,CATALOGUED
+104,Logo,Lisp-family,Educational turtle symbolic,1967,Dynamic,Interpreted,Pedagogy geometric reasoning,3,CATALOGUED
+105,Rexx,Scripting,Structured text procedural,1979,Dynamic untyped,Interpreted,Mainframe scripting OS/2,3,CATALOGUED
+106,Tcl,Scripting,Command string evaluation,1988,Dynamic string-only,Interpreted (Bytecode),EDA chip synthesis automation,3,CATALOGUED
+107,AWK,Scripting,Pattern scanning text pipeline,1977,Dynamic,Interpreted,Log file parsing data extraction,3,CATALOGUED
+108,Sed,Stream-editor,Regular expression stream editor,1974,Untyped,Interpreted,Stream text transformation,3,CATALOGUED
+109,ActionScript 3,ECMAScript,OOP web multimedia,2006,Static optional,AVM2 bytecode,Historical rich web application,3,CATALOGUED
+110,CoffeeScript,Ruby/Python/JS,Transpiled clean syntax,2009,Dynamic,Transpiled to JS,Precursor to modern ES6 features,3,CATALOGUED
+111,Elm,ML-family,Pure functional web UI,2012,Static strong inferred,Compiled to JS,Zero runtime exceptions UI,3,CATALOGUED
+112,PureScript,Haskell-family,Strict functional web,2013,Static strong inferred,Compiled to JS / C / Go,Functional frontend applications,3,CATALOGUED
+113,ReasonML,OCaml-family,OCaml with JS syntax,2016,Static strong inferred,Compiled to JS / Native,React native functional code,3,CATALOGUED
+114,ReScript,OCaml-family,Pragmatic typed web,2020,Static strong inferred,Transpiled to clean JS,High-performance typed web UI,3,CATALOGUED
+115,Haxe,Multi-paradigm,Universal cross-compiler,2005,Static strong gradual,Cross-compiled to C++/JS/C#,Game dev multimedia porting,3,CATALOGUED
+116,Vala,C#/Java-family,GObject OOP modern C,2006,Static strong,Transpiled to C,GNOME desktop application core,3,CATALOGUED
+117,Genie,Python/Vala,Indented GObject OOP,2008,Static strong,Transpiled to C,GNOME rapid utility tooling,3,CATALOGUED
+118,Seed7,Extensible,Extensible syntax procedural,2005,Static strong,Compiled to C / Interpreted,Language extensibility research,3,CATALOGUED
+119,Icon,SNOBOL-family,Goal-directed string scanning,1977,Dynamic,Interpreted (Virtual Machine),Pattern matching generator loops,3,CATALOGUED
+120,SNOBOL4,Pattern-family,String manipulation pattern,1967,Dynamic,Interpreted,Text pattern search historical,3,CATALOGUED
+121,BASIC (MSX/GW),Dartmouth,Line-numbered imperative,1964,Dynamic / Static typed,Interpreted / Compiled,Microcomputer era education,3,CATALOGUED
+122,Visual Basic 6,BASIC-family,Component RAD event-driven,1998,Dynamic/Static weak,P-code / Native compiled,Windows rapid client software,3,CATALOGUED
+123,Visual Basic .NET,BASIC-family,OOP .NET framework,2002,Static strong,CLR bytecode JIT,Enterprise Windows services,3,CATALOGUED
+124,AutoHotkey,Scripting,Hotkeys automation imperative,2003,Dynamic weak,Interpreted,Desktop automation macros,3,CATALOGUED
+125,AutoIt,BASIC-family,Windows GUI automation,1999,Dynamic,Interpreted,Desktop admin installer scripts,3,CATALOGUED
+126,AppleScript,Natural-English,Scriptable application control,1993,Dynamic,Interpreted OSA,macOS workflow automation,3,CATALOGUED
+127,MATLAB,Matrix-family,Numerical array computing,1984,Dynamic matrix-native,Interpreted / JIT,Aerospace signal processing Simulink,3,CATALOGUED
+128,Octave,MATLAB-family,Numerical array computing,1992,Dynamic,Interpreted,Open source scientific computing,3,CATALOGUED
+129,Scilab,MATLAB-family,Numerical computational,1990,Dynamic,Interpreted,Engineering control systems,3,CATALOGUED
+130,LabVIEW,Dataflow G,Graphical visual programming,1986,Static visual,Compiled native,Avionics testbench sensor instrumentation,3,CATALOGUED
+131,Modelica,Equation-family,Object-oriented physical modeling,1997,Static declarative,Compiled solver code,Aerospace cyber-physical systems,3,CATALOGUED
+132,OpenSCAD,Declarative,Constructive solid geometry,2010,Static functional,Evaluated 3D CSG,Parametric CAD manufacturing,3,CATALOGUED
+133,Groovy,Java-family,Dynamic agile JVM,2003,Dynamic / Optional,JVM bytecode,Jenkins CI/CD Gradle build,3,CATALOGUED
+134,Raku (Perl 6),Perl-family,Multi-paradigm meta-programming,2015,Gradual strong,MoarVM bytecode,Advanced regex linguistic parsing,3,CATALOGUED
+135,Pike,C-family,Dynamic OOP server-side,1994,Dynamic,Interpreted bytecode,High-performance web server Roxy,3,CATALOGUED
+136,Io,Prototype,Pure prototype actor-concurrency,2002,Dynamic,Interpreted bytecode,Language concurrency research,3,CATALOGUED
+137,Self,Smalltalk,Pure prototype-based OOP,1987,Dynamic,JIT pioneered adaptive,Adaptive JIT optimization VM roots,3,CATALOGUED
+138,Oz / Mozart,Multi-paradigm,Declarative concurrent logic,1991,Dynamic,Mozart VM,CS concepts multi-paradigm pedagogy,3,CATALOGUED
+139,Mercury,Logic-functional,Purity-enforced declarative,1995,Static strong pure,Compiled native / C,High-reliability logic programming,3,CATALOGUED
+140,Logtalk,Prolog-family,Object-oriented logic,1998,Static nominal,Transpiled to Prolog,Modular formal knowledge bases,3,CATALOGUED
+141,Datalog,Logic-family,Declarative query deductive,1977,Static relational,Evaluated fixed-point,Network routing security analysis,3,CATALOGUED
+142,GraphQL,Declarative,API data query language,2015,Static typed,Engine resolved,Client-directed API fetches,3,CATALOGUED
+143,ASN.1,Specification,Abstract syntax notation,1984,Static declarative,Compiled by ASN1C codec,Telecom 3GPP GPON OMCI packets,3,CATALOGUED
+144,Protobuf IDL,Interface-def,Data serialization protocol,2008,Static schema,Compiled to language stubs,Microservices gRPC router RPC,3,CATALOGUED
+145,Cap'n Proto,Zero-copy IDL,Serialization IPC protocol,2013,Static schema,Direct memory mapped,Zero-copy high-throughput IPC,3,CATALOGUED
+146,FlatBuffers,Zero-copy IDL,Memory-efficient serialization,2014,Static schema,Direct buffer access,High-throughput avionics telemetries,3,CATALOGUED
+147,YANG,Data modeling,Network configuration model,2010,Static hierarchy,NETCONF / RESTCONF consumed,Router RFC 6020 config data model,3,CATALOGUED
+148,P4,Domain-specific,Packet processing pipeline,2014,Static typed,Compiled to TCAM/ASIC,Programmable switches line-rate,3,CATALOGUED
+149,Click Modular Router,Domain-specific,Configurable router graphs,1999,Modular C++ graphs,Evaluated graph kernel,Software router packet graph design,3,CATALOGUED
+150,OpenFlow,Protocol,SDN forwarding control,2008,Static message wire,Controller / Switch executed,Decoupled router control plane,3,CATALOGUED
+151,Bicep,Declarative,Cloud infrastructure DSL,2020,Static typed,Compiled to ARM JSON,Azure infrastructure automation,3,CATALOGUED
+152,HCL (Terraform),Declarative,HashiCorp infrastructure DSL,2014,Dynamic schema,Evaluated by Terraform,Cloud telecom VPC provisioning,3,CATALOGUED
+153,Nix,Functional,Reproducible package management,2003,Dynamic lazy,Evaluated by Nix engine,Deterministic toolchain builds,3,CATALOGUED
+154,Guix Scheme,Lisp-family,Functional package management,2012,Dynamic strong,GNU Guile evaluated,Free software reproducible systems,3,CATALOGUED
+155,Dhall,Functional,Programmable configuration,2017,Static strongly-typed total,Normalized to JSON/YAML,Safe cloud configuration without code,3,CATALOGUED
+156,Cue,Logic-lattice,Configuration validation data DSL,2019,Static graph unification,Evaluated constraint,Policy enforcement schema gate,3,CATALOGUED
