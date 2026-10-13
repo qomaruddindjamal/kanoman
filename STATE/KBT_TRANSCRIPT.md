@@ -3,6 +3,7 @@
 > **Evaluation ID:** KBT-01-COMPLIANCE  
 > **Target:** Kanoman Dialog Policy & Autonomous Persona Engine  
 > **Evaluator:** Anti Gravity (Lead Architect & Systems Mentor)  
+> **Host Uji Riil:** gemini-cli local environment (Terminal Interactive Mode / Windows 11 host x86_64)  
 > **Status:** **8 / 8 SCENARIOS PASS (100% COMPLIANT)** -> **OPCR-47 PASS-LOCKED**  
 
 ---
