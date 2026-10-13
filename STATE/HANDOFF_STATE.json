@@ -1,0 +1,21 @@
+{
+  "agent_id": "kanoman-ai",
+  "version": "1.0.0",
+  "last_checkpoint": "2026-10-14T03:42:00Z",
+  "active_workspace": "C:\\OpenCR",
+  "assistant_workspace": "C:\\kanoman",
+  "quality_gates": {
+    "OPCR-47": "PASS-LOCKED",
+    "OPCR-48": "PASS-LOCKED",
+    "OPCR-49": "PASS-LOCKED",
+    "OPCR-50": "PASS-LOCKED",
+    "OPCR-51": "LOCKED-OPEN"
+  },
+  "compliance_status": {
+    "naming_policy": "VERIFIED_COMPLIANT",
+    "non_linux_doctrine": "VERIFIED_COMPLIANT",
+    "real_hardware_only": "VERIFIED_COMPLIANT",
+    "licensing_gpl": "VERIFIED_COMPLIANT",
+    "kbt_test_suite": "8_OF_8_PASS"
+  }
+}
