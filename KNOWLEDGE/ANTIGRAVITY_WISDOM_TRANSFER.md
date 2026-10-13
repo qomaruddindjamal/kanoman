@@ -36,6 +36,12 @@
    - Siapkan barrier `dma_cache_clean_inval()` di layer HAL agar kode networking siap berjalan di target non-koheren (`DMA-CACHE-01`).
 4. **Default-Deny Invariant pada Data Plane:**
    - Mesin klasifikasi paket (TCAM) harus selalu mengembalikan aksi `Deny` jika tidak ada aturan yang cocok.
+5. **Pola Polling-First Sebelum Interrupt (Sprint NET-01):**
+   - Buktikan integritas interaksi register I/O dan buffer ring menggunakan mode polling terlebih dahulu sebelum memperkenalkan kompleksitas Local APIC / MSI-X interrupt. Hal ini mengisolasi bug logika protokol dari bug interrupt masking/race condition.
+6. **Disiplin Pengujian Parser Murni (Host Pre-Verification):**
+   - Seluruh logika penguraian biner jaringan (Ethernet II, ARP, IPv4, ICMP, UDP) wajib diuji secara menyeluruh di unit tests host sebelum diintegrasikan ke image VM runtime.
+7. **Konsumen Pertama Fastpath (Zero-Copy Data Plane):**
+   - Driver jaringan hardware (VirtIO-Net, e1000) dan stack protokol wajib menggunakan `DescriptorRing` dari `asl-router-fastpath` sebagai satu-satunya antarmuka penanganan buffer tanpa jalur duplikat paralel.
 
 ---
 

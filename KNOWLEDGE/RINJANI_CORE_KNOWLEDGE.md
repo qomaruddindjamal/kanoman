@@ -28,6 +28,10 @@ Open Core Router (OpenCR) adalah sistem operasi router carrier-grade yang berjal
    - `asl-router-tcam`: IPv4 5-tuple matching engine (default-deny).
    - `asl-router-gpon-ont` & `asl-router-olt-carrier`: Stack akses serat optik GPON/XGS-PON.
    - `asl-router-qos`, `asl-router-switching`, `asl-router-security-vault`, `asl-router-undi-npu`: Akselerasi paket, kriptografi, dan offload coprocessor.
+   - `asl-router-pci`: Enumerasi bus PCI (config space 0xCF8/0xCFC, BAR decoding).
+   - `asl-router-drivers-virtio`: Driver native VirtIO-Net (Virtqueue split ring) & fallback Intel 82540EM (e1000).
+   - `asl-router-netbuf`: Pool buffer paket statis zero-allocation (power-of-two, double-free guard).
+   - `asl-router-netstack`: Native carrier protocol stack (Ethernet II, RFC 826 ARP, IPv4, ICMP Echo, UDP).
 
 ---
 
@@ -39,10 +43,14 @@ Open Core Router (OpenCR) adalah sistem operasi router carrier-grade yang berjal
 
 ---
 
-## 3. Rantai Boot Bare-Metal (Boot Chain Pipeline)
+## 3. Rantai Boot & Data Plane Pipeline
 1. **Linker Script (`linker.ld`):** Higher-half virtual address `0xFFFF800000100000`, 4KB page alignment, PHDRS Limine.
 2. **Entrypoint Stub (`_start` di `src/main.rs`):** Assembly trampoline mengatur stack 512KB page-aligned, melompat ke `rinjani_kernel_main`.
-3. **Telemetri Serial COM1 (`0x3F8`):** Memancarkan marker deterministic bertahap `[R1]`..`[R7]`.
+3. **Telemetri Serial COM1 (`0x3F8`):** Memancarkan marker deterministic bertahap `[R1]`..`[R12]`.
+4. **Data Plane Flow (Zero-Copy):**
+   $$\text{PCI Bus Scan} \rightarrow \text{VirtIO-Net Device} \rightarrow \text{DescriptorRing (Fastpath)} \rightarrow \text{NetBuffer Pool} \rightarrow \text{NetStack (ARP/IPv4/ICMP)}$$
+5. **Mastering ISO Hybrid (`scripts/build-iso.ps1`):** `xorriso` menggabungkan kernel ELF + `limine.conf` + Limine BIOS/UEFI sys, lalu `limine.exe bios-install` menanamkan boot code.
+6. **Runtime VM Execution:** VirtualBox mem-boot ISO headless dan menangkap telemetri COM1.
 4. **Mastering ISO Hybrid (`scripts/build-iso.ps1`):** `xorriso` menggabungkan kernel ELF + `limine.conf` + Limine BIOS/UEFI sys, lalu `limine.exe bios-install` menanamkan boot code.
 5. **Runtime VM Execution:** VirtualBox mem-boot ISO headless dan menangkap telemetri COM1.
 
