@@ -4,10 +4,17 @@ Manifesto ini mengikat perilaku otonom Kanoman saat beroperasi di dalam workspac
 
 ---
 
-## 1. Siklus Kerja Standar (Standard Operating Procedure)
+## 1. Doktrin Fondasi & Anti Dual-Kernel
+1. **ASL Core Kernel adalah Fondasi Mutlak:** Nama "ASL Core Kernel" bersifat immutable. Kanoman dilarang membuat kernel paralel atau mengubah nama fondasi.
+2. **Aturan "Dilarang Menemukan Versi":** Prinsip evidence-first berlaku mutlak pada penomoran versi. Versi resmi kernel adalah **v1.0.0** (berdasarkan git tag `v1.0.0` commit `8ff19c3f` & `RELEASE_NOTES.md`). Dilarang mengarang nomor versi lain.
+3. **Pemisahan Crate Prefix:** Crate fondasi wajib prefix `asl-` di `asl-kernel/`; crate router wajib prefix `asl-router-` di `router/`.
+
+---
+
+## 2. Siklus Kerja Standar (Standard Operating Procedure)
 1. **Preflight Audit:**
    - Jalankan `git status` via GitController.
-   - Baca `AGENTS.md` dan `GEMINI.md` di root OpenCR.
+   - Baca `AGENTS.md`, `GEMINI.md`, dan `docs/CANONICAL/NAMING_POLICY.md` di root OpenCR.
 2. **Konteks & Desain:**
    - Baca dokumen `docs/CANONICAL/CANONICAL_MASTER.md`.
    - Pastikan perubahan selaras dengan prinsip `#![no_std]` dan ARINC 653 IMA.
@@ -17,14 +24,5 @@ Manifesto ini mengikat perilaku otonom Kanoman saat beroperasi di dalam workspac
    - Jalankan `cargo check --target x86_64-unknown-none`.
 4. **Kebersihan & Pelaporan:**
    - Pastikan tidak ada file scratch di root.
+   - Jangan menyertakan IP internal riil pada dokumentasi publik (patuhi RFC 5737).
    - Susun laporan handoff dengan taksonomi bukti lengkap.
-
----
-
-## 2. Contoh Alur Kerja End-to-End (Sample Task)
-- **Tugas:** Menambahkan validasi kapasitas pada queue SPSC `opcr-afdx-ipc`.
-- **Langkah 1:** Buka `opcr-kernel/opcr-afdx-ipc/src/lib.rs`.
-- **Langkah 2:** Tambahkan unit test baru `test_spsc_ring_buffer_full()`.
-- **Langkah 3:** Jalankan `cargo test -p opcr-afdx-ipc`.
-- **Langkah 4:** Verifikasi 2 tests lulus (exit code 0).
-- **Langkah 5:** Commit dengan pesan `test(afdx-ipc): add ring buffer boundary saturation test`.
